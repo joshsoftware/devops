@@ -1,0 +1,7 @@
+- include: nagios-client.yml
+  when: "'nagios_client' in group_names and inventory_hostname in groups['nagios_client'] and nagios_client == true"
+
+- include: add_node.yml
+  when: "'nagios_server' in group_names and inventory_hostname in groups['nagios_server'] and nagios_add_node == true and nagios_client == true"
+
+- debug: var=inventory_hostname

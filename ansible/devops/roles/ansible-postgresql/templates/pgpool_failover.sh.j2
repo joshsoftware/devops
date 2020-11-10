@@ -1,0 +1,10 @@
+#!/bin/bash -x
+FALLING_NODE=$1         # %d
+OLDPRIMARY_NODE=$2      # %P
+NEW_PRIMARY=$3          # %H
+PGDATA=$4               # %R
+ 
+if [ $FALLING_NODE = $OLDPRIMARY_NODE ]; then
+        ssh -T -o "StrictHostKeyChecking no" postgres@$NEW_PRIMARY touch {{trigger_file}}
+fi;
+exit 0;

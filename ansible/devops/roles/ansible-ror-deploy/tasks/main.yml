@@ -1,0 +1,102 @@
+---
+#Create deploy user for deployment
+- name: Create deploy group
+  group:
+    name: "{{user.name}}"
+    gid: "{{ user.gid}}"
+
+- name: Create deploy user
+  user: 
+    name: "{{user.name}}"
+    uid: "{{user.uid}}"
+    system: yes
+    state: present
+
+- name: Create .ssh for deploy user
+  file:
+    path: "{{deploy_home_dir}}/.ssh"
+    state: directory
+    owner: "{{user.name}}"
+    group: "{{user.name}}"
+    recurse: no
+    mode: 0700
+  
+- copy:
+    content: "{{deploy_ssh_priv}}"
+    dest: "{{deploy_home_dir}}/.ssh/id_rsa"
+    owner: '{{user.name}}'
+    group: '{{user.name}}'
+    mode: 0600
+
+- name: check web root directory
+  stat: 
+    path: "/var/www"
+  register: web_root
+
+- debug: var=web_root
+
+- name: Create web root directory if doesn't exist
+  file:
+    path: "/var/www"
+    state: directory
+    owner: '{{user.name}}'
+    group: '{{user.name}}'
+  when: web_root.stat.exists == false
+
+- name: Initialize the deploy root and gather facts
+  deploy_helper:
+    path: "/var/www/{{app_domain_name}}"
+
+  register: deploy
+
+- debug: var=deploy
+
+- name: Set webroot directory ownership
+  file: 
+    path: "/var/www/{{app_domain_name}}"
+    state: directory
+    owner: "{{user.name}}"
+    group: "{{user.name}}"    
+    recurse: true
+  with_items: ["config", "logs", "scripts"]
+
+- name: create directory structure
+  file: 
+    path: "/var/www/{{app_domain_name}}/shared/{{ item }}"
+    state: directory
+    recurse: true
+  with_items: ["config", "logs", "scripts"]
+
+- name: Clone the project to the new release folder
+  git:
+    repo: '{{ deployapp.git_url }}'
+    dest: '{{ deploy_helper.new_release_path }}'
+    version: '{{ deployapp.git_branch }}'
+    accept_hostkey: yes
+  become: true
+  become_user: '{{user.name}}'
+
+- name: setup client server
+  include: "before_migrate.yml"
+  become: true
+  become_user: '{{user.name}}'
+
+
+- name: Run DB migration
+  shell: "cd {{ deploy_helper.new_release_path }} && bundle exec rake db:migrate --trace"
+  when: run_migration == true
+  become: true
+  become_user: '{{user.name}}'
+
+  register: testin
+
+- debug: var=testin
+  
+- name: update current symlink
+  file:
+    src: "{{ deploy_helper.new_release_path }}"
+    path: "{{ deploy_helper.current_path }}"
+    state: link
+    force: yes
+
+- include: nginx_vhost.yml

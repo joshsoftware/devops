@@ -1,0 +1,25 @@
+#!/bin/bash
+
+COMMAND=$2
+PROCESS_NAME=${COMMAND//[ :]/-}
+ENV=${3:-'development'}
+source "{{rvm1_install_path}}/scripts/rvm
+
+echo "============================"
+echo $(date) : $1, $COMMAND, $ENV
+case $1 in
+  start)
+    cd {{ deploy_to }}/current
+    EXP="RAILS_ENV=$ENV bundle exec $COMMAND >>
+    {{deploy_to}}/shared/log/$PROCESS_NAME.log 2>&1 &"
+    eval $EXP
+    echo $! > {{deploy_to}}/shared/tmp/$PROCESS_NAME.pid;
+    ;;
+  stop)
+    kill -9 `cat {{deploy_to}}/shared/tmp/$PROCESS_NAME.pid`
+    ;;
+  *)
+    echo "usage: bin/generic-wrapper.sh start 'rake data:alexa' staging"
+    ;;
+esac
+exit 0

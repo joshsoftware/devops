@@ -1,0 +1,5 @@
+check process elasticsearch with pidfile {{pid_dir}}/elasticsearch.pid
+   start program = "/bin/systemctl start {{ instance_sysd_script | basename}}"
+   stop  program = "/bin/systemctl start {{ instance_sysd_script | basename}}"
+   if 5 restarts within 5 cycles then timeout
+   if failed host {{ ansible_default_ipv4.address }} port 9200 type http then restart

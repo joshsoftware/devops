@@ -1,0 +1,23 @@
+command[check_mem]=/usr/lib/nagios/plugins/check_mem.sh -w 75 -c 90
+
+{% if nagios_redis is defined %}
+command[check_redis_ping]=/usr/lib/nagios/plugins/check_redis.pl -H {{redis.host}} {%if redis.username == ''%}{% else %}-u {{redis.username}}{% endif %} {%if redis.password == ''%}{% else %} -p '{{redis.password}}'{% endif %}  -t ping 
+command[check_redis_mem]=/usr/lib/nagios/plugins/check_redis.pl -H localhost {%if redis.username == ''%}{% else %}-u {{redis.username}}{% endif %} {%if redis.password == ''%}{% else %} -p '{{redis.password}}'{% endif %} -m
+command[check_redis_connections]=usr/lib/nagios/plugins/check_redis.pl -H localhost {%if redis.username == ''%}{% else %}-u {{redis.username}}{% endif %} {%if redis.password == ''%}{% else %} -p '{{redis.password}}'{% endif %} -a --connected_clients=WARN:1000,CRIT:1500
+{% endif %}
+
+{% if nagios_postgres is defined %}
+command[check_postgres_conn]=/usr/lib/nagios/plugins/check_postgres.pl -H {{postgresql.host}} -u {{postgresql.username}} -db {{postgresql.database}} -p 5432 --dbpass {{postgresql.password}} --action connection
+command[check_postgres_clients]=/usr/lib/nagios/plugins/check_postgres.pl -H {{postgresql.host}} -u {{postgresql.username}} -db {{postgresql.database}} -p 5432 --dbpass {{postgresql.password}} --action backends
+command[check_postgres_dbsize]=/usr/lib/nagios/plugins/check_postgres.pl -H {{postgresql.host}} -u {{postgresql.username}} -db {{postgresql.database}} -p 5432 --dbpass {{postgresql.password}} --action database_size
+{% endif %}
+
+{% if nagios_mongodb is defined %}
+command[check_mongo_conn]=/usr/lib/nagios/plugins/check_mongodb.py -A connect -H {{mongodb.host}} {%if mongodb.database == ''%}{% else %}-d {{mongodb.database}}{% endif %} {%if mongodb.username == ''%}{% else %}-u {{mongodb.username}}{% endif %} {%if mongodb.password == ''%}{% else %} -p '{{mongodb.password}}'{% endif %} -W 2 -C 4
+
+command[check_mongo_clients]=/usr/lib/nagios/plugins/check_mongodb.py -A connections -H {{mongodb.host}} {%if mongodb.database == ''%}{% else %}-d {{mongodb.database}}{% endif %} {%if mongodb.username == ''%}{% else %}-u {{mongodb.username}}{% endif %}{%if mongodb.password == ''%}{% else %} -p '{{mongodb.password}}'{% endif %} -W 70 -C 80
+
+command[check_mongo_dbsize]=/usr/lib/nagios/plugins/check_mongodb.py -A database_size -H {{mongodb.host}} {%if mongodb.database == ''%}{% else %}-d {{mongodb.database}}{% endif %} {%if mongodb.username == ''%}{% else %}-u {{mongodb.username}}{% endif %}{%if mongodb.password == ''%}{% else %} -p '{{mongodb.password}}'{% endif %} 
+
+command[check_mongo_mem]=/usr/lib/nagios/plugins/check_mongodb.py -A memory -H {{mongodb.host}} {%if mongodb.database == ''%}{% else %}-d {{mongodb.database}}{% endif %} {%if mongodb.username == ''%}{% else %}-u {{mongodb.username}}{% endif %}{%if mongodb.password == ''%}{% else %} -p '{{mongodb.password}}'{% endif %}
+{% endif %}

@@ -1,0 +1,37 @@
+---
+language: python
+python: "2.7"
+
+sudo: true
+
+# Install ansible
+addons:
+  apt:
+    packages:
+    - python-pip
+
+install:
+  # Install ansible
+  - pip install ansible==2.0.1
+
+  # Check ansible version
+  - ansible --version
+
+  # Create ansible.cfg with correct roles_path
+  - printf '[defaults]\nroles_path=../' >ansible.cfg
+
+script:
+  - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+
+  # Run the role/playbook with ansible-playbook.
+  - ansible-playbook -i tests/inventory tests/test.yml --connection=local
+
+  # Run only gems task.
+  - ansible-playbook -i tests/inventory tests/test.yml --connection=local --tags "gems"
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+  email: false
+  slack:
+    rooms:
+      secure: siaT2Q7zaWhbcYjysle/2wt0BeQqOpLCBBAOxHIsvtzE6ruOQ3/lJdd1DosjR2ucavPkV0BrSE+efIfK0sXd2DLECFEKgGwPltrutlMn575+J5K8lIscTPbPC1zpHFccQVFWRP+uNoIxU1aea6qERl3E3DnaD/P5L5aUpZ28tO2YznaHG3YhM0qJV+Le4cEWpdQ5NYdIZr92MOyq8tkMAGljYJLB8WC/8nB5ilmUof24eIaP4vFwOorOXs/9Lig3FwanP8sjOrM+bjwIIK63Hx40wmWIBDzcBLZHI5ClGLOCVr3/gyX3dmj/7exhoa0m6FxM36X2k+p1yW0hxTqoFlLyb2F8ZNNAHwxgRsi7a1ie3/VpbPB8SA83o+Ojhhf6Za1oD/zIorO5TO4eLOKIoOoGMX2HerylfjlHJdhzovopkh/DLbsNXtO1mKXhMHzJYNP3tcbbkxsOswQY6PYlNJOT9Ufh/qQrAvkiZquh5wUSManFgX5ne6X8Wqdp1SulvDMc2u+HT7eHTnV34B9Ly9z/1oymkMF3IanfrLclb3lx3RHhOi+jKXkEbABPEKYCC9F7Lt+JVVLLoQM2ml5o5PzT/bwIIoyNye1rROkcMdjgxk2OS3Ipbc/Z5PYbI6l4W114BXEHS+8d91qVdTC4vXrWM2Bnay3B+LsiYP9zfKM=

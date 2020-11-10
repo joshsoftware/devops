@@ -1,0 +1,9 @@
+- name: Run the Nginx installation script
+  command: /usr/local/src/install-nginx.sh
+
+- name: Generate the Nginx configuration file and restart the service if it has been updated
+  template: src=nginx.conf.j2
+            dest={{ nginx_location }}/conf/nginx.conf
+            owner=root
+            group=root
+            force=yes

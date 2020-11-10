@@ -1,0 +1,8 @@
+{{rails.env}}:
+  adapter: {{db.adapter}}
+  pool: 5
+  timeout: 5000
+  username: {{db[db['adapter']].username}}
+  password: {{db[db['adapter']].password}}
+  database: {{db[db['adapter']].dbname}}
+  host: {{db[db['adapter']].host}}

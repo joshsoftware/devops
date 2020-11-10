@@ -1,0 +1,24 @@
+---
+- name: rhel-restart-postgresql
+  service:
+    name: "postgresql-{{postgres_version}}"
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: rhel-stop-postgresql
+  service:
+    name: "postgresql-{{postgres_version}}"
+    state: stopped
+  when: ansible_os_family == "RedHat"
+
+- name: debian-restart-postgresql
+  service:
+    name: "postgresql"
+    state: restarted
+  when: ansible_os_family == "Debian"
+
+- name: debian-stop-postgresql
+  service:
+    name: "postgresql"
+    state: stopped
+  when: ansible_os_family == "Debian"

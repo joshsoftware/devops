@@ -1,0 +1,38 @@
+test: "sfsdgd"
+before_migrate: true
+run_migration: false
+app_domain_name: "abc.example.com"
+
+rails:
+  env: "development"
+
+user:
+  name: deploy
+  gid: 1010
+  uid: 1010
+deploy_home_dir: '/home/{{user.name}}'
+
+#ROR database details
+db:
+  adapter: 'mysql2'
+
+  #connection details
+  sqlite3:
+    database: 'db/test.sqlite3'
+    pool: 10
+  mysql2:
+    username: "root"
+    dbname: "myapp"
+    password: "machine"
+    host: "localhost"
+    pool: 10
+  postgresql:
+    username: "root"
+    dbname: "myapp"
+    password: "machine"
+    host: "localhost"
+
+deployapp:
+  git_url: '<ssh github repo url>'
+  git_branch: '<git repo branch>'
+

@@ -1,0 +1,11 @@
+- name: restart apache
+  sudo: true
+  service: name=apache2 state=restarted
+
+- name: restart nagios server
+  sudo: true
+  service: name=nagios state=restarted
+
+
+- name: restart nagios nrpe
+  service: name=nagios-nrpe-server state=restarted

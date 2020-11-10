@@ -1,0 +1,6 @@
+---
+- name: Create script to set redis env variable
+  template: 
+    src: "etc/profile.d/redis_env.sh.j2"
+    dest: /etc/profile.d/redis_env.sh
+

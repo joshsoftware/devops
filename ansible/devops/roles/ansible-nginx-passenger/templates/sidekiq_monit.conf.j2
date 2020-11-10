@@ -1,0 +1,5 @@
+check process sidekiq with pidfile {{deploy_to}}/shared/tmp/sidekiq.pid
+  every 10 cycles
+  start program = "/bin/bash -c 'cd {{deploy_to}}/current/ && bundle exec sidekiq -e {{rails_env}} -d -L {{deploy_to}}/shared/log/sidekiq.log -P {{deploy_to}}/shared/tmp/sidekiq.pid -c {{ sidekiq_threads | default(2) }}'" as uid "ubuntu" and gid "ubuntu"
+  stop program = "/bin/bash -c 'cd {{deploy_to}}/current/ && bundle exec sidekiqctl stop {{deploy_to}}/shared/tmp/sidekiq.pid'"
+  group sidekiq

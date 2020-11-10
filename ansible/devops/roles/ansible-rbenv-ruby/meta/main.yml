@@ -1,0 +1,18 @@
+galaxy_info:
+  author: "Gordon Shumway"
+  description: Install rbenv and ruby-build plugin for specified user.
+  license: MIT
+
+  min_ansible_version: 1.9
+
+  platforms:
+  - name: Ubuntu
+    versions:
+    - all 
+
+  galaxy_tags:
+    - rbenv
+    - ruby
+    - gems
+
+dependencies: []

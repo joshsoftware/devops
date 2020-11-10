@@ -1,0 +1,69 @@
+{% if (nginx_passenger is defined) and ( nginx_passenger == true ) %}
+user  {{ ansible_ssh_user }};
+{% elif (nginx_unicorn is defined) and ( nginx_unicorn == true ) %}
+user  www-data;
+{% endif%}
+
+
+worker_processes  {{ ansible_processor_vcpus }};
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+
+    {% if (ruby_install_from_source == true) and (nginx_passenger is defined) and ( nginx_passenger == true ) %}
+    passenger_root {{ ruby_location }}/lib/ruby/gems/2.3.0/gems/passenger-{{ passenger_version }};
+    passenger_ruby {{ ruby_location }}/bin/ruby;
+
+    passenger_max_pool_size {{ passenger_max_pool_size }};
+    passenger_max_requests {{ passenger_max_requests }};
+
+    {% elif (ruby_install_using_rvm == true) and (nginx_passenger is defined) and ( nginx_passenger == true ) %}
+    passenger_root {{ rvm1_install_path }}/gems/ruby-{{ ruby_version }}/gems/passenger-{{ passenger_version }};
+    passenger_ruby {{ rvm1_install_path }}/gems/ruby-{{ ruby_version }}/wrappers/ruby;
+
+    passenger_max_pool_size {{ passenger_max_pool_size }};
+    passenger_max_requests {{ passenger_max_requests }};    
+    {% endif %}
+
+    tcp_nopush on;
+    tcp_nodelay on;
+    types_hash_max_size 2048;
+    server_tokens off;
+
+    gzip on;
+    gzip_disable "msie6";
+
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    #gzip  on;
+    #Add sites configuration
+    include sites/*;
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+
+}

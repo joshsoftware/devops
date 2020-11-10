@@ -1,0 +1,22 @@
+---
+- name: Check if nginx_passenger & nginx_unicorn both are enable
+  fail:
+    msg: "nginx_unicorn & nginx_passenger cann't be true at a time"
+  when: "nginx_passenger == true and nginx_unicorn == true "
+
+- name: Check ssl certs path availble or not
+  fail:
+    msg: "nginx_ssl_certs_path is required when you enable nginx_ssl"
+  when: "nginx_ssl == true and nginx_ssl_certs_path == '' "
+
+- include: nginx_passenger.yml
+  when:
+    - nginx_passenger is defined and nginx_passenger == true
+  tags:  
+    - 'nginx_reconfigure'
+
+- include: nginx_unicorn.yml
+  when:
+    - nginx_unicorn is defined and nginx_unicorn == true
+  tags:  
+    - 'nginx_reconfigure'

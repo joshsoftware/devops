@@ -1,0 +1,13 @@
+[Unit]
+Description=Redis In-Memory Data Store
+After=redis_6379.target
+
+[Service]
+LimitNOFILE=20000
+User={{redis_user}}
+Group={{redis_group}}
+ExecStart={{redis_install_dir}}/bin/redis-server /etc/redis/sentinel_{{ redis_sentinel_port }}.conf --sentinel
+ExecStop=/opt/{{redis_install_dir}}/bin/redis-cli -p {{ redis_sentinel_port }} -h 127.0.0.1 shutdown
+
+[Install]
+WantedBy=multi-user.target

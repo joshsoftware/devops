@@ -1,0 +1,32 @@
+---
+# - copy: content="{{ hostvars[inventory_hostname] }}" dest=/tmp/testing
+
+#check hostgroup exist or not
+- shell: "grep -r '{{ nagios_hostgroup }}' /usr/local/nagios/etc/objects/localhost.cfg /usr/local/nagios/etc/servers/*"
+  register: testing
+  ignore_errors: yes
+
+#Debug variables
+- debug: var=testing
+
+
+
+#Create empty
+- file: path=/usr/local/nagios/etc/servers/hostgroups.cfg state=file
+
+#Add hostgroup block if doesn't exist
+- lineinfile: line='define hostgroup {\n\thostgroup_name\t{{ nagios_hostgroup }}\n\talias\t{{ nagios_hostgroup }}\n\t}' dest=/usr/local/nagios/etc/servers/hostgroups.cfg state=present
+  when: "'{{ nagios_hostgroup }}' not in testing.stdout"
+
+- name: add node to server
+  template:
+    src: templates/nodes.cfg.j2
+    dest: "/usr/local/nagios/etc/servers/{{ item }}.cfg"
+  tags:
+    - add_node
+  with_items:
+    - "{{ groups['nagios_client'] }}"
+  changed_when: true
+  notify: restart nagios server
+
+

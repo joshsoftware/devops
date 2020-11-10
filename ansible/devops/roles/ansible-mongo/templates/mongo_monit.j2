@@ -1,0 +1,12 @@
+{% if ansible_service_mgr == 'systemd' %}
+check process mongo
+    with pidfile "{{mongodb_storage_dbpath}}/mongod.lock"
+    start program = "/bin/systemctl start {{mongodb_daemon_name}}"
+    stop program = "/bin/systemctl stop {{mongodb_daemon_name}}"
+{% else %}
+check process redis-server
+    with pidfile "{{mongodb_storage_dbpath}}/mongod.lock"
+    start program = "/etc/init.d/{{mongodb_daemon_name}} start"
+    stop program = "/etc/init.d/{{mongodb_daemon_name}} stop"
+
+{% endif %}

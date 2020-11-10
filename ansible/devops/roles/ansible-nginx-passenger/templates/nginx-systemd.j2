@@ -1,0 +1,12 @@
+[Unit]
+Description=Nginx - a high performance http(s) server
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart={{ nginx_location }}/sbin/nginx
+ExecReload={{ nginx_location }}/sbin/nginx -s reload
+ExecStop={{ nginx_location }}/sbin/nginx -s stop
+
+[Install]
+WantedBy=multi-user.target

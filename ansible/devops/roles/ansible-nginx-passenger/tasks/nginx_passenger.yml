@@ -1,0 +1,128 @@
+---
+- name: Install the libcurl GnuTLS development files that Passenger requires
+  apt: 
+    pkg: '{{item}}'
+    state: present
+  with_items:
+    - 'libcurl4-gnutls-dev'
+    - 'monit'
+    - 'nodejs'
+    - 'build-essential'
+    - '{{ extra_packages }}'
+
+- name: Uninstall existing passenger gem
+  command: gem uninstall passenger
+  when: nginx_reconfigure == true
+
+- block:
+  - name: Install Ruby {{ ruby_version }} compatible rake version(source)
+    command: "{{ ruby_location }}/bin/gem install rack -v {{ rack_version }}"
+
+  - name: Install Passenger
+    command: "{{ ruby_location }}/bin/gem install passenger -v {{ passenger_version }}
+              creates={{ ruby_location }}/lib/ruby/gems/{{ ruby_library_version }}/gems/passenger-{{ passenger_version }}/README.md"
+  when: ruby_install_from_source == true 
+
+- block:
+  - name: Install Ruby {{ ruby_version }} compatible rake version(rvm)
+    command: "{{ rvm1_install_path }}/rubies/ruby-{{ ruby_version }}/bin/gem install rack -v {{ rack_version }}"
+
+  - name: Install Passenger rvm
+    command: "{{ rvm1_install_path }}/rubies/ruby-{{ ruby_version }}/bin/gem install passenger -v {{ passenger_version }}
+              creates={{ rvm1_install_path }}/gems/ruby-{{ ruby_version }}/gems/passenger-{{ passenger_version }}/README.md"
+  when: ruby_install_using_rvm == true
+
+
+# #- name: Make Passenger symlinks
+# #  file: path=/usr/local/bin/{{ item }}
+# #        src={{ ruby_location }}/bin/{{ item }}
+# #        state=link
+# #  with_items:
+# #    - passenger-memory-stats
+# #    - passenger-status
+
+- name: Download the Nginx source code
+  get_url: url=http://nginx.org/download/nginx-{{ nginx_version }}.tar.gz
+           dest=/usr/local/src/
+
+- name: Generate the Nginx installation script on the server
+  template: src=install-nginx.j2
+            dest=/usr/local/src/install-nginx.sh
+            owner=root
+            group=root
+            mode=700
+
+- include: override_conf.yml
+  when: nginx_reconfigure == true
+
+- name: Run the Nginx installation script
+  command: /usr/local/src/install-nginx.sh creates={{ nginx_location }}/sbin/nginx
+
+- name: Generate the Nginx configuration file and restart the service if it has been updated
+  template: src=nginx.conf.j2
+            dest={{ nginx_location }}/conf/nginx.conf
+            owner=root
+            group=root
+
+- name: create sites dir for vhost conf
+  file:
+    path: "{{ nginx_location }}/conf/sites"
+    state: directory
+    mode: 0755
+
+
+- name: Generate Nginx init script and restart the service if it has been updated
+  template: src=nginx-systemd.j2
+            dest=/lib/systemd/system/nginx.service
+            owner=root
+            group=root
+            mode=755
+  when: ansible_service_mgr == 'systemd'
+
+- name: Add symlink for systemd
+  file: src=/lib/systemd/system/nginx.service dest=/etc/systemd/system/multi-user.target.wants/nginx.service state=link
+  when: ansible_service_mgr == 'systemd'
+  
+- name: "if its systemd, do a daemon reload"
+  command: systemctl daemon-reload
+  when: ansible_service_mgr == 'systemd'
+  notify: Restart Nginx
+
+
+- name: Generate Nginx init script and restart the service if it has been updated
+  template: src=nginx-init.j2
+            dest=/etc/init.d/nginx
+            owner=root
+            group=root
+            mode=755
+  when: ansible_service_mgr != 'systemd'
+  notify: Restart Nginx
+
+- name: "if its systemd, do a daemon reload"
+  command: systemctl daemon-reload
+  when: ansible_service_mgr == 'systemd'
+  notify: Restart Nginx
+
+- name: Set up log rotation for Nginx
+  template: src=nginx-logrotate.j2
+            dest=/etc/logrotate.d/nginx
+            owner=root
+            group=root
+            mode=644
+
+- name: Check monit installed or not
+  command: which monit
+  register: check_monit
+
+- debug: var=check_monit
+
+- name: Add event handler to monit for nginx
+  template:
+    src: nginx-monit.conf.j2
+    dest: /etc/monit/conf.d/nginx
+    mode: 0755
+  when: '"monit" in check_monit.stdout'
+
+
+#Include vhost conf playbook
+- include: vhost_conf.yml

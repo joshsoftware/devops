@@ -1,0 +1,70 @@
+---
+- name: os-specific vars
+  include_vars: "{{ansible_os_family}}.yml"
+  tags:
+      - always
+
+- name: check-set-parameters
+  include: elasticsearch-parameters.yml
+  tags:
+      - always
+
+- include: java.yml
+  when: es_java_install
+  tags:
+      - java
+
+- include: elasticsearch.yml
+  tags:
+      - install
+
+- include: elasticsearch-config.yml
+  tags:
+      - config
+
+- include: elasticsearch-scripts.yml
+  when: es_scripts
+  tags:
+      - scripts
+
+- include: elasticsearch-plugins.yml
+  when: es_plugins is defined or es_plugins_reinstall
+  tags:
+      - plugins
+
+  #We always execute xpack as we may need to remove features
+- include: xpack/elasticsearch-xpack.yml
+  tags:
+      - xpack
+
+- include: elasticsearch-templates.yml
+  when: es_templates
+  tags:
+      - templates
+
+- meta: flush_handlers
+
+- name: Check monit installed or not
+  command: which monit
+  register: check_monit
+
+- debug: var=check_monit
+
+- name: setup monit conf
+  template:
+    src: templates/es_monit.j2
+    dest: /etc/monit/conf.d/elasticsearch
+  when: '"monit" in check_monit.stdout'
+
+- service:
+    name: monit
+    state: reloaded
+  when: '"monit" in check_monit.stdout'
+
+- name: Set log rotation
+  template:
+    src: templates/es_logrotate.j2
+    dest: /etc/logrotate.d/{{ instance_suffix }}
+
+- name: Wait for elasticsearch to startup
+  wait_for: host={{ ansible_default_ipv4.address }} port={{es_api_port}} delay=5 connect_timeout=1

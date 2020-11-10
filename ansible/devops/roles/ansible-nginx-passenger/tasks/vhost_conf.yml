@@ -1,0 +1,69 @@
+- name: Create directory for SSL certs
+  file:
+    path: "/etc/ssl/{{ app_domain_name }}"
+    state: directory
+
+- name: Copy SSL cert & key.
+  copy:
+    src: "{{item}}"
+    dest: "/etc/ssl/{{ app_domain_name }}/"
+    mode: 0755
+  with_fileglob:
+    - "{{ nginx_ssl_certs_path}}/*"
+  when: nginx_ssl == true
+
+- block:  
+  - name: Create virtual host conf file
+    template:
+      src: "templates/nginx_vhost.conf.j2"
+      dest: "{{ nginx_location }}/conf/sites/{{app_domain_name}}.conf"
+      mode: 0755
+
+  - name: create gemset
+    command: "{{ rvm1_install_path }}/bin/rvm gemset create {{ rvm1_gemset }}"
+    when: rvm1_gemset is defined
+  when: nginx_passenger is defined and nginx_passenger == true
+
+- name: Copy ssh private key file to ansible_ssh_user home dir
+  copy:
+    src: "{{ssh_private_key_file_path}}"
+    dest: "{{ ansible_env.PWD}}/.ssh/id_rsa"
+    mode: 0600
+    owner: "{{ansible_ssh_user }}"
+    group: "{{ansible_ssh_user }}"
+  when: ssh_private_key_file_path is defined
+
+- name: create deploy_to directory
+  file:
+    path: "{{deploy_to}}/shared/tmp/sockets"
+    recurse: true
+    owner: "{{ansible_ssh_user}}"
+    group: "{{ansible_ssh_user}}"
+    state: directory
+
+# - name: Copy generic wrrper script to shared/script
+#   template:
+#     src: generic_wrapper.sh.j2
+#     dest: "{{deploy_to}}/shared/scripts/generic_wrapper.sh"
+#     mode: 0755
+#     owner: "{{ansible_ssh_user}}"
+#     group: "{{ansible_ssh_user}}"
+#   when: sidekiq_enable is defined
+
+- name: Copy sidekiq monit config
+  template:
+    src: templates/sidekiq_monit.conf.j2
+    dest: /etc/monit/conf.d/sidekiq
+  when: sidekiq_enable is defined
+
+- name: restart monit
+  service:
+    name: monit
+    enabled: yes
+    state: restarted
+
+
+- name: apply log rotation for application
+  template:
+    src: templates/logrotate.j2
+    dest: "/etc/logrotate.d/{{app_domain_name}}"

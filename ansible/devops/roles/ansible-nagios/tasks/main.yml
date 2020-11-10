@@ -1,0 +1,2 @@
+- include: nagios-server.yml
+  when: "'nagios' in group_names and inventory_hostname in groups['nagios'] and nagios_server == true"

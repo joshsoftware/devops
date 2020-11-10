@@ -1,0 +1,18 @@
+---
+
+#Remove PATH set entry from .profile
+- lineinfile:
+    dest: './.profile'
+    state: present
+    regexp: '^PATH\=\"\$HOME\/bin'
+    line: '#PATH="$HOME/bin:$HOME/.local/bin:$PATH'
+
+- name: Install RVM
+  include: 'rvm.yml'
+  become: yes
+  become_user: '{{ rvm1_user }}'
+
+- name: Install Ruby and Gems
+  include: 'rubies.yml'
+  become: yes
+  become_user: '{{ rvm1_user }}'

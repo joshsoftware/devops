@@ -1,0 +1,109 @@
+#!/bin/bash
+
+##This is meanst to be run on the slave, with the masters ip as the passed variable. ($1)
+sourcehost="$1"
+repl_user_password="$2"
+homedir=/var/lib/postgresql
+datadir=/var/lib/postgresql/9.5/main
+archivedir=/var/lib/postgresql/9.5/archive
+archivedirdest=/var/lib/postgresql/9.5/archive
+
+echo $repl_user_password
+#Usage
+if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ "$1" = "--help" ];
+then
+	echo "Usage: $0 masters ip address"
+exit 0
+fi
+#This script must be run as postgres user
+Whoami () {
+    if [[ $(whoami) != "postgres" ]]
+    then
+        echo "[INFO] This script must be run as postgres user !"
+	exit 1
+    fi
+}
+
+#Check if postgres server is running on remote host
+CheckIfPostgresIsRunningOnRemoteHost () {
+	isrunning="$(ssh -o "StrictHostKeyChecking=no" postgres@"$1" 'if killall -0 postgres; then echo "postgres_running"; else echo "postgress_not_running"; fi;')"
+
+	if [[ "$isrunning" = "postgress_not_running" ]]
+	then
+		echo "[ERROR] Postgres not running on the master. Exiting..";
+        exit 1
+
+	elif [[ "$isrunning" = "postgres_running" ]]
+	then
+		echo "[OK] Postgres master running on remote host";
+
+	elif echo "[ERROR] Unexpected response. Exiting.."
+	then
+		exit 1
+	fi
+}
+
+#Check if the supposed master is actually a master
+CheckIfMasterIsActuallyAMaster () {
+    ismaster="$(ssh -o "StrictHostKeyChecking=no" postgres@"$1" 'if [ -f /var/lib/postgresql/9.5/main/recovery.done ]; then echo "postgres_is_a_master_instance"; else echo "postgres_is_not_master"; fi;')"
+
+    if [[ "$ismaster" = "postgres_is_not_master" ]]
+    then
+        echo "[ERROR] Postgres is already running as a slave. Exiting..";
+        exit 1
+    elif [[ "$ismaster" = "postgres_is_a_master_instance" ]]
+    then
+        echo "[INFO] Postgres is running as master (probably)";
+    elif echo "[ERROR] Unexpected response. Exiting.."
+    then
+        exit 1
+    fi
+}
+
+CopyDataFromMaster() {
+    #Clear all the existing data
+    echo "[INFO] Stopping slave node..";
+    sudo /etc/init.d/postgresql stop
+
+    rm -rf $datadir;
+    PGPASSWORD=$repl_user_password pg_basebackup -h $1 -D /var/lib/postgresql/9.5/main -U replicator
+}
+
+#prepare local server to become the new slave server.
+CheckForRecoveryConfig () {
+
+    if [ -f '/tmp/trigger_file' ]
+    then
+            rm /tmp/trigger_file
+    fi
+
+    if [[ -f "$datadir/recovery.done" ]];
+    then
+            rm "$datadir"/recovery.done
+    fi 
+
+    if [[ -f "$datadir/recovery.conf" ]];
+    then
+        echo "[OK] Slave config file found"
+    else
+        echo "[OK] Creating recovery.conf file";
+        echo -e "standby_mode = 'on'\nprimary_conninfo='host=$sourcehost port=5432 user=replicator password=$repl_user_password'\ntrigger_file = '/tmp/postgresql.trigger.5432'" >  $datadir/recovery.conf	
+    fi
+}
+
+echo $repl_user_password
+
+StartSlave () {
+    echo "[INFO] Starting slave node..";
+    sudo /etc/init.d/postgresql start
+    if ! killall -0 postgres; then echo ;'[ERROR] Slave not running !'; else echo "[OK] Slave started."; fi;
+    exit 1
+}
+
+#Execute above operations
+Whoami
+CheckIfPostgresIsRunningOnRemoteHost "$1"
+CheckIfMasterIsActuallyAMaster "$1"
+CopyDataFromMaster "$1"
+CheckForRecoveryConfig "$datadir"
+StartSlave

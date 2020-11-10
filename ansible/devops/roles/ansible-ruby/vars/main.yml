@@ -1,0 +1,23 @@
+---
+ruby_dependencies:
+  - libreadline-dev
+  - libssl-dev
+  - libyaml-dev
+  - zlib1g-dev
+  - libmysqlclient-dev
+
+ruby_symlinks:
+  - bundle
+  - erb
+  - gem
+  - irb
+  - rake
+  - rdoc
+  - ri
+  - ruby
+
+ruby_location: "/usr/local"
+
+ruby_version:           "2.3.0"
+ruby_library_version:   "{{ ruby_version }}"
+ruby_download_url: "http://cache.ruby-lang.org/pub/ruby/ruby-{{ ruby_version }}.tar.gz"

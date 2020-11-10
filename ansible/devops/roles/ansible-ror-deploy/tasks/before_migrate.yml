@@ -1,0 +1,15 @@
+---
+- block:
+
+  - name: run before migrate
+    template:
+      src: "templates/database.yml.j2"
+      dest: "{{ deploy_helper.new_release_path }}/config/database.yml"
+  
+  - name: install gem bundles
+    shell: bundle install --path {{deploy_helper.shared_path}}/.bundle
+    args:
+      chdir: "{{deploy_helper.new_release_path}}"
+
+  
+  when: before_migrate is defined

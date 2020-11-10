@@ -1,0 +1,5 @@
+---
+- name: Сloning ruby-build plugin for rbenv
+  git: repo=https://github.com/sstephenson/ruby-build.git
+       dest={{ rbenv_root_path }}/plugins/ruby-build
+       update=no

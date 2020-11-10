@@ -1,0 +1,23 @@
+---
+
+- include: dependencies.yml
+  tags: [rbenv]
+
+- include: rbenv.yml
+  tags: [rbenv]
+
+- include: ruby-build.yml
+  tags: [rbenv]
+
+- name: Check if ruby {{ rbenv_ruby_version }} is installed
+  command: $SHELL -lc "rbenv versions | grep {{ rbenv_ruby_version }}"
+  register: is_ruby_installed
+  ignore_errors: yes
+  tags: [rbenv]
+
+- include: ruby.yml
+  when: is_ruby_installed|failed
+  tags: [rbenv]
+
+- include: gems.yml
+  tags: [rbenv, gems]

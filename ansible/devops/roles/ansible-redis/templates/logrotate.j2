@@ -1,0 +1,11 @@
+{{ redis_logfile }} {
+  daily
+  size 500M
+  missingok
+  compress
+  rotate 20
+  date
+  notifempty
+  extension gz
+  copytruncate
+}

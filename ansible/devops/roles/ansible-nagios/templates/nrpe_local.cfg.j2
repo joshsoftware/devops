@@ -1,0 +1,13 @@
+command[check_mem]=/usr/lib/nagios/plugins/check_mem.sh -w 75 -c 90
+
+{% if nagios_redis == true %}
+command[check_redis_ping]=/usr/lib/nagios/plugins/check_redis.pl -H {{redis.host}} -t ping
+command[check_redis_mem]=/usr/lib/nagios/plugins/check_redis.pl -H localhost -m
+command[check_redis_connections]=usr/lib/nagios/plugins/check_redis.pl -H localhost -a --connected_clients=WARN:1000,CRIT:1500
+{% endif %}
+
+{% if nagios_redis == true %}
+command[check_postgres_conn]=/usr/lib/nagios/plugins/check_postgres.pl -H {{postgresql.host}} -u {{postgresql.username}} -db {{postgresql.database}} -p 5432 --dbpass {{postgresql.password}} --action connection
+command[check_postgres_clients]=/usr/lib/nagios/plugins/check_postgres.pl -H {{postgresql.host}} -u {{postgresql.username}} -db {{postgresql.database}} -p 5432 --dbpass {{postgresql.password}} --action backends
+command[check_postgres_dbsize]=/usr/lib/nagios/plugins/check_postgres.pl -H {{postgresql.host}} -u {{postgresql.username}} -db {{postgresql.database}} -p 5432 --dbpass {{postgresql.password}} --action database_size
+{% endif %}

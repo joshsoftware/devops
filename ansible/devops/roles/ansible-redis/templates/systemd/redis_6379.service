@@ -1,0 +1,14 @@
+[Unit]
+Description=Redis In-Memory Data Store
+After=network.target
+
+[Service]
+LimitNOFILE=20000
+User={{redis_user}}
+Group={{redis_group}}
+ExecStart={{redis_install_dir}}/bin/redis-server /etc/redis/{{ redis_port }}.conf
+ExecStop={{redis_install_dir}}/bin/redis-cli shutdown
+ExecStartPost=/bin/sh -c "echo $MAINPID > {{ redis_pidfile }}"
+
+[Install]
+WantedBy=multi-user.target

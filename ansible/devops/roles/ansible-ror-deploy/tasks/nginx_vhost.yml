@@ -1,0 +1,24 @@
+---
+- name: check sites conf status directory
+  stat: 
+    path: "/opt/nginx/conf/sites"
+  register: tmp
+
+- debug: var=tmp
+
+- name: Create sites conf directory
+  file:
+    path: "/opt/nginx/conf/sites"
+    state: directory
+  when: tmp.stat.exists == false
+
+- name: Create virtual host
+  template: 
+    src:  templates/nginx_vhost.conf.j2
+    dest: "/opt/nginx/conf/sites/{{ app_domain_name }}.conf"
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+

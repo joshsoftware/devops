@@ -1,0 +1,16 @@
+---
+nginx_checksum: "23b8ff4a76817090678f91b0efbfcef59a93492f6612dc8370c44c1f1ce1b626"
+nginx_version: "1.10.2"
+
+passenger_version: "5.1.1"
+
+#nginx_location: "/opt/nginx"
+
+###CHANGED BY ANUJA WARE
+nginx_location: "/etc/nginx"
+
+extra_packages: ['vim']
+nginx_reconfigure: false
+
+nginx_extra_configure_flags: ''
+nginx_extra_module: [{mod_name: 'more_set_header', }]

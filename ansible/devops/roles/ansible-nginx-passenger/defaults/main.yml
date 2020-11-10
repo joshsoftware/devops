@@ -1,0 +1,10 @@
+---
+passenger_max_pool_size: "4"
+passenger_max_requests:  "2000"
+
+nginx_port: 80
+nginx_ssl_port: 443
+nginx_ssl: false
+nginx_ssl_certs_path: ''          #SSL Certs & Key path on ansible workstation from where you are running ansible playbook command.  This variable is mandatory when you enable nginx_ssl. 
+
+

@@ -1,0 +1,28 @@
+---
+# - set_fact: bind_interface="{{ ansible_interfaces | reject("equalto","lo") | first  }}"
+
+- lineinfile: "dest=/etc/sudoers state=present regexp='^{{ ansible_user  }}' line='{{ ansible_user  }} ALL=(ALL) NOPASSWD: ALL'"
+
+- name: set home directory
+  set_fact: postgres_home=/var/lib/pgsql
+  when: ansible_os_family == "RedHat"
+
+- name: set home directory
+  set_fact: postgres_home=/var/lib/postgresql
+  when: ansible_os_family == "Debian"
+
+- name: Set Data directory (RedHat)
+  set_fact: postgres_datadir="{{postgres_home}}/{{ postgres_version }}/data"
+  when: ansible_os_family == "RedHat"
+
+- name: Set Data directory (Debian)
+  set_fact: postgres_datadir="{{postgres_home}}/{{ postgres_version }}/main"
+  when: ansible_os_family == "Debian"
+
+- include: pg_repo.yml
+
+- include: install_postgres.yml
+  # when: '"master" in ansible_group or "slave" in ansible_group or "backup" in ansible_group'
+
+
+- include: master.yml

@@ -1,0 +1,39 @@
+---
+#### Testing 1
+#- set_fact:
+#      ubuntu_codename: "{% if ansible_distribution_major_version == '14' %}trusty{% elif ansible_distribution_major_version == '16' %}xenial{% elif ansible_distribution_major_version == '18' %}bionic{% else %}''{% endif %}"
+#  when:
+#    - ansible_os_family == "Debian"
+
+- apt_key:
+    url: https://ftp-master.debian.org/keys/archive-key-6.0.asc
+    state: present
+  when: ansible_os_family == "Debian"
+
+- apt_key:
+    url: http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
+    state: present
+  when: ansible_os_family == "Debian"
+
+### Not working for ubuntu 20 ###
+#- apt_repository:
+#    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ubuntu_codename }}-pgdg main"
+#    filename: 'pgdg'
+#  when:
+#    - ansible_os_family == "Debian"
+
+### Testing 1
+- apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
+    filename: 'pgdg'
+  when:
+    - ansible_os_family == "Debian"
+
+
+- name: get pgdg for RHEL7 base is present
+  yum: name="http://yum.postgresql.org/9.5/redhat/rhel-7-x86_64/pgdg-centos95-9.5-2.noarch.rpm" state=present
+  when: ansible_os_family == "RedHat"
+
+- name: install EPEL 7 remote repo
+  yum: name=http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm state=present
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= 7

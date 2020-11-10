@@ -1,0 +1,12 @@
+{% if ansible_service_mgr == 'systemd' %}
+check process redis
+    with pidfile "{{ redis_pidfile }}"
+    start program = "/bin/systemctl start redis_6379"
+    stop program = "/bin/systemctl stop redis_6379"
+{% else %}
+check process redis-server
+    with pidfile "{{ redis_pidfile }}"
+    start program = "/etc/init.d/redis_6379 start"
+    stop program = "/etc/init.d/redis_6379 stop"
+
+{% endif %}

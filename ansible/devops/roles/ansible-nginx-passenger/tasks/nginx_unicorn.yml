@@ -1,0 +1,59 @@
+---
+# Install nginx With Extra modules
+- name: Install nginx 
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - 'nginx'
+    - 'nginx-extras'
+    - 'nodejs'
+    - '{{ extra_packages }}'
+
+- name: Generate the Nginx configuration file and restart the service if it has been updated
+  template: src=nginx.conf.j2
+            dest=/etc/nginx/nginx.conf
+            owner=root
+            group=root
+
+- name: Copy scripts to server to enable & disable site
+  copy:
+    src: 'files/{{ item }}'
+    dest: '/usr/sbin/{{ item }}'
+    mode: 0755
+  with_items:
+    - nxensite
+    - nxdissite
+
+- set_fact: 
+    nginx_upstream: "unicorn_{{ app_domain_name | replace('.', '_') }}"
+
+- debug: var=one_fact
+
+- name: Create virtual host conf file
+  template:
+    src: "templates/nginx_unicorn_vhost.j2"
+    dest: "/etc/nginx/sites-available/{{app_domain_name}}.conf"
+    mode: 0755
+
+- name: Enable vhost configuration
+  command: "nxensite {{app_domain_name}}.conf"
+  notify: Restart Nginx
+
+
+- name: Check monit installed or not
+  command: which monit
+  register: check_monit
+  ignore_errors: yes
+
+- debug: var=check_monit
+
+- name: Add event handler to monit for nginx
+  template:
+    src: nginx-monit.conf.j2
+    dest: /etc/monit/conf.d/nginx
+    mode: 0755
+  when: '"monit" in check_monit.stdout'
+
+#Include vhost conf playbook
+- include: vhost_conf.yml

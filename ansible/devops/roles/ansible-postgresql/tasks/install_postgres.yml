@@ -1,0 +1,108 @@
+---
+
+# - name: ensure apt cache is up to date
+#   apt: update_cache=yes
+#   when: ansible_os_family == "Debian"
+
+# - name: ensure yum cache is up to date
+#   yum: update_cache=yes name="*"
+#   when: ansible_os_family == "RedHat"psycopg2
+
+- name: ensure packages are installed
+  package: name={{item}}
+  with_items: "{{  postgresql_packages[ansible_os_family] }}"
+  when: ansible_os_family == "RedHat"
+
+### Deprecation Warning due to ansible version is handled
+- name: ensure packages are installed
+  apt: name={{  postgresql_packages[ansible_os_family] }} update_cache=yes state=present allow_unauthenticated=yes
+  when: ansible_os_family == "Debian"
+
+
+- name: check if initdb is done for RHEL7
+  stat: path="/var/lib/pgsql/9.5/data/PG_VERSION"
+  register: initdb
+  when: ansible_os_family == "RedHat"
+
+- name: ensure initdb on RHEL7 base
+  command: "/usr/pgsql-{{postgres_version}}/bin/postgresql{{postgres_version_nodot}}-setup initdb"
+  when:
+    - ansible_os_family == "RedHat"
+    - initdb.stat.exists is defined and not initdb.stat.exists
+
+- name: "if its systemd, do a daemon reload"
+  command: systemctl daemon-reload
+  when: ansible_service_mgr  == 'systemd'
+
+- name: check the service started
+  service: name=postgresql enabled=yes
+  when: ansible_os_family == "Debian"
+  notify: debian-stop-postgresql
+
+- meta: flush_handlers
+
+- name: check the service started
+  service: name="postgresql-{{postgres_version}}" enabled=yes
+  when: ansible_os_family == "RedHat"
+  changed_when: true
+  notify: 
+    - rhel-stop-postgresql
+
+- meta: flush_handlers
+
+- name: Set the configuration file for Debian family
+  template: src=templates/postgres_master.j2 dest="/var/lib/postgresql/{{postgres_version}}/main/postgresql.conf"
+  when: ansible_os_family == "Debian"
+
+- name: Set the configuration file for RedHat family
+  template: src=templates/redhat_postgres_master.j2 dest="{{postgres_datadir}}/postgresql.conf"
+  when: ansible_os_family == "RedHat"
+
+- authorized_key:
+    user: postgres
+    key: "{{ id_rsa_pub }}"
+    path: "{{postgres_home}}/.ssh/authorized_keys"
+    manage_dir: no
+
+- name: Set the private key file to authentication postgres user between nodes
+  copy:
+    content: "{{id_rsa_pri}}"
+    mode: 0600
+    owner: postgres
+    group: postgres
+    dest: "{{postgres_home}}/.ssh/id_rsa"
+
+- name: Add postgres to sudoer file to start postgresql
+  lineinfile:
+    line: "postgres ALL=(ALL) NOPASSWD: {{item}}"
+    dest: /etc/sudoers
+    state: present
+  with_items:
+    - "/etc/init.d/postgresql start"
+    - "/etc/init.d/postgresql stop"
+    - "/etc/init.d/postgresql restart"
+
+- name: create archive directory
+  file:
+    path: "{{postgres_home}}/{{ postgres_version }}/archive"
+    owner: postgres
+    group: postgres
+    state: directory
+
+# - name: Add postgres to sudoer file to stop postgresql
+#   lineinfile:
+#     line: "postgres ALL=(ALL) NOPASSWD: /etc/init.d/postgresql stop"
+#     dest: /etc/sudoers
+#     state: present
+
+# - name: Add postgres to sudoer file to restart postgresql
+#   lineinfile:
+#     line: "postgres ALL=(ALL) NOPASSWD: /etc/init.d/postgresql restart"
+#     dest: /etc/sudoers
+#     state: present
+
+- name: Copy stream replication script
+  template:
+    mode: 0755
+    src: templates/streaming-replication.sh.j2
+    dest: "{{ postgres_home }}/streaming-replication.sh"

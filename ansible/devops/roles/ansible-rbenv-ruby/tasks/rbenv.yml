@@ -1,0 +1,15 @@
+---
+
+- name: Cloning rbenv repository
+  git: repo={{ rbenv_repo_path }} 
+       dest={{ rbenv_root_path }}
+       update=no
+       version={{ rbenv_version }}
+
+- name: Add rbenv initialization to profile system-wide
+  template: src=etc/profile.d/rbenv.sh.j2 dest=/etc/profile.d/rbenv.sh owner=root group=root mode=0755
+  become: true
+
+- name: Compile dynamic bash extension to speed up rbenv (ignore if it fails)
+  command: $SHELL -lc "cd {{ rbenv_root_path }} && src/configure && make -C src"
+  ignore_errors: yes

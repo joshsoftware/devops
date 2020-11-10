@@ -1,0 +1,35 @@
+postgres_version: "{{postgres_version}}"
+postgres_version_nodot: "{{ postgres_version | replace('.', '') }}"
+
+postgresql_packages:
+  Debian:
+    - postgresql-{{postgres_version}}
+    - postgresql-contrib-{{postgres_version}}
+    - libpq-dev
+    - python3-psycopg2
+  RedHat:
+    - postgresql{{postgres_version_nodot}}-server
+    - postgresql{{postgres_version_nodot}}-contrib
+    - postgresql{{postgres_version_nodot}}-libs
+    - libpqxx-devel
+    - python-psycopg2
+
+pgpool_packages:
+  Debian:
+    - postgresql-client-{{postgres_version}}
+    - postgresql-{{postgres_version}}-pgpool2
+    - pgpool2
+  RedHat:
+    - postgresql{{postgres_version_nodot}}
+    - pgpool-II-{{postgres_version_nodot}}
+
+#postgres conf details
+wal_level: 'hot_standby'
+archive_mode: on
+archive_command: 'cd .'
+max_wal_senders: 5
+wal_keep_segments: 32
+hot_standby: on
+
+#allow remote connection from servers
+postgres_allow_conn_from: []

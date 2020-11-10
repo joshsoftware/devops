@@ -1,0 +1,12 @@
+{{mongodb_systemlog_path}} {
+  daily
+  size 500M
+  missingok
+  compress
+  rotate 20
+  create 755 {{mongodb_user}} {{mongodb_user}}
+  date
+  notifempty
+  extension gz
+  copytruncate
+}

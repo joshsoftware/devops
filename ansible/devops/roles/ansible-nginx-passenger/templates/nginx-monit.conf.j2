@@ -1,0 +1,13 @@
+{% if ansible_service_mgr == 'systemd' %}
+check process nginx with pidfile {{nginx_location}}/logs/nginx.pid
+  start program = "/bin/systemctl start nginx"
+  stop program  = "/bin/systemctl stop nginx"
+  group www-data
+
+{% else %}
+check process nginx with pidfile {{nginx_location}}/nginx.pid
+  start program = "/usr/sbin/service nginx start"
+  stop program  = "/usr/sbin/service nginx stop"
+  group www-data
+
+{% endif %}
