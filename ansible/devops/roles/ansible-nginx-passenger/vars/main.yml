@@ -9,7 +9,7 @@ passenger_version: "5.1.1"
 ###CHANGED BY ANUJA WARE
 nginx_location: "/etc/nginx"
 
-extra_packages: ['vim']
+extra_packages: "vim"
 nginx_reconfigure: false
 
 nginx_extra_configure_flags: ''
