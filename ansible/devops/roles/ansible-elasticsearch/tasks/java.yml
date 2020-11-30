@@ -9,9 +9,9 @@
   yum: name={{ java }} state={{java_state}}
   when: ansible_os_family == 'RedHat'
   
-#- name: Debian - Ensure Java is installed
-#  apt: name={{ java }} state={{java_state}} update_cache=yes force=yes
-#  when: ansible_os_family == 'Debian'
+- name: Debian - Ensure Java is installed
+  apt: name={{ java }} state={{java_state}} update_cache=yes force=yes
+  when: ansible_os_family == 'Debian'
 
 - command: java -version 2>&1 | grep OpenJDK
   register: open_jdk

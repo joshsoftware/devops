@@ -19,7 +19,7 @@ Note : Install python3 & pip3 if not present before upgrading ansible using pip3
 
 * Clone Repo
 ```sh
-mkdir -p ~/ansible/devops && cd ~/ansible/devops && git clone git@github.com:gautamrege/devops.git ./roles
+git clone https://github.com/joshsoftware/devops.git
 ```
 you will see, all roles has benn cloned in "roles" folder
 
@@ -33,12 +33,19 @@ Note: You can use host.example file as a template
 
 * Create sites.yml
 ```yaml
+---
+################################################################
+#Do not remove below host block, this is to check python binary#
+################################################################
 - hosts: all
   gather_facts: False
   tasks:
-   - name: install python 2
-     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+   - name: install python 3 
+     raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3-minimal)
 
+################################################################
+#Do not remove below host block, this is to gather server facts#
+################################################################
 - hosts: all
   tasks:
   - name: Fake task to get facts
@@ -46,13 +53,31 @@ Note: You can use host.example file as a template
     with_items:
     - []
 
-- name: setup ror server
-  hosts: web
+# Use below host block & uncomment ansible roles which you wants to run on target host group
+- name: setup nagios client
+  hosts: appserver
   roles:
-    - "ansible-ruby"         #Add only If you are installing from source code
-    - "ansible-rvm-ruby"     #Add only If you are installing using rvm
-    - "ansible-monit"
-    - "ansible-nginx-passenger"
+#    - "ansible-rvm-ruby"                # Delete this line if you are not installing ruby using RVM, for variables refer vars.yml
+#    - "ansible-monit"
+#    - "ansible-nginx-passenger"         # Configure nginx with passenger, for variables refer vars.yml
+#    - "ansible-redis"                   # Configure redis stand alone, for variables refer vars.yml
+#    - "ansible-mongo"                   # Configure mongo standalone, for variables refer vars.yml
+#    - "ansible-postgresql"              # Setup postgres, for variables refer vars.yml
+#    - "ansible-nagios-client"           # Configure nagios client, for variables refer vars.yml
+
+##To add node to Nagios server? just enable beow block as it is but dont forget to add nagios_server,nagios_client in hosts file as mentioned in example file.
+#- name: setup nagios 
+#  hosts: nagios_server,nagios_client
+#  roles:
+#   - ansible-nagios-client
+
+#Note: To setup a component on separate server? create new host block & add role in it like below example
+#Install elasticsearch on single/separate server
+
+#- name: setup elasticsearch server node
+#  hosts: appserver
+#  roles:
+#  - "ansible-elasticsearch"           # Adding elasticsearch role for standalone standalone, for variables refer vars.yml                                               
 ```
 
 Note: You can use sites.yml.example file & uncomment required roles for installation
@@ -108,10 +133,10 @@ Note: You can use vars.yml.example file & uncomment & set value for required var
 
 * Run playbook
 ```sh
-ansible-playbook -i hosts sites.yml --extra-vars "@./vars.yml" --sudo -vv
+ansible-playbook -i hosts sites.yml --extra-vars "@./vars.yml" -b -vv
 
 #to reconfigure nginx add tag to playbook command
-ansible-playbook -i hosts sites.yml --extra-vars "@./vars.yml" --sudo -vv --tags 'nginx_reconfigure'
+ansible-playbook -i hosts sites.yml --extra-vars "@./vars.yml" -b -vv --tags 'nginx_reconfigure'
 ```
 
 ### For redis installation
@@ -133,7 +158,7 @@ redis_version: <version>          # like '2.8.9' or '3.0.9'
 ```
 * Run playbook
 ```sh
-ansible-playbook -i hosts sites.yml --extra-vars "@./vars.yml" --sudo -vv
+ansible-playbook -i hosts sites.yml --extra-vars "@./vars.yml" -b -vv
 ```
 
 ### To setup mongo setup
@@ -158,8 +183,9 @@ mongodb_storage_dbpath: '<path on the server>'
 ```
 *  Run playbook
 ```sh
-ansible-playbook -i hosts sites.yml --sudo  --extra-vars "@./vars.yml" -vv
+ansible-playbook -i hosts sites.yml -b --extra-vars "@./vars.yml" -vv
 ```
 #### Final sites.yml will script install Ruby, Nginx + Passenger, Redis, Mongo
 
 #### For elastic search playbook, refer sites.yml, vars.yml, hosts example files
+.
