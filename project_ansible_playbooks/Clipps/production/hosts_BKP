@@ -1,0 +1,9 @@
+[nagios_client:children]
+web
+
+[web]
+13.126.42.69 ansible_ssh_user=ubuntu 
+ansible_ssh_private_key_file=/home/krish/.ssh/id_rsa
+
+#[nagios_server]
+#localhost ansible_ssh_user=ubuntu

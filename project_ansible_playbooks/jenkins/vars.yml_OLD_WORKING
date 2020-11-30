@@ -1,0 +1,116 @@
+#Checkout the file and uncomment reuired parameter
+
+########################################## monit mail configuration parameters
+monit_mail_enabled: true
+monit_mailserver_host: "smtp.gmail.com"
+monit_mailserver_port: 465
+monit_mailserver_user: "joshsoftwaretest1@gmail.com"
+monit_mailserver_password: "josh@411021"
+monit_mailserver_ssl_version: 'TLSV1'
+
+##Monit playbook parameter
+monit_host: "localhost"
+monit_alert_addresses: ['payal@joshsoftware.com', 'ashvini@joshsoftware.com']
+monit_disk_list: [{name: 'root', device:  'nvme0n1p1'}]    # uncomment this line for nagios-client installation also.
+
+##########################################  Ruby from source code or using rvm installation decision happens on below parameters
+ruby_install_from_source: false         #Set true if wants to setup using source
+ruby_install_using_rvm: true            #Set true if wants to setup using rvm
+
+##Ruby version parameters
+ruby_version:           "2.6.5"
+
+##uncomment below parameters if you are using ruby  user should be one you will be using for deployment and path should be under user's home dir
+rvm1_user: 'root'
+rvm1_install_flags: '--auto-dotfiles'
+rvm1_install_path: '/usr/local/rvm'
+
+#Gemset creation, set below parameter if you wants to create gemset
+#rvm1_gemset: 'gem_set_name'
+
+##########################################  Nginx + passenger parameters
+nginx_version: "1.17.1"
+nginx_extra_configure_flags: '--with-stream --with-http_realip_module'
+nginx_passenger: true                           #set to 'true' when you use nginx with passenger or set it to false
+nginx_unicorn: false                             #set to 'true' when you use nginx with unicorn or set it to false
+#nginx_ssl: true                                 #Uncomment if ssl needs to be configured
+#nginx_ssl_certs_path: '<ssl certs & key folder path on local system (ansible workstation)>'     #SSL cert & key should be named like app_domain_name.crt & app_domain_name.key
+#Passenger version
+passenger_version: "6.0.0"
+
+##########################################  Nginx reconfigurre parameter
+#nginx_reconfigure: false               #Set this variable value to true if you wants to reconfigure nginx passenger
+
+########################################## ruby compatible rack version 
+rack_version: '2.0.7'
+
+#Additional parameters required to setup nginx passenger with virtual host conf
+app_domain_name: '13.126.42.69'
+rails_env: 'production'
+deploy_to: '/www/clipps'              #this will be the document root for 'app_domain_name' virtual host with suffix 'current/public' for ROR
+
+######################################### Configure sidekiq parameters
+sidekiq_enable: false                  #set to true if application using sidekiq
+sidekiq_queue: ['default','mailers']            #By default is: default
+sidekiq_threads: 2  
+ #By default is : 2
+
+
+########################################   add extra packages, lib or dependencies in the list that need's to be installed on server before deployment
+#extra_packages: ['libmysqlclient-dev']
+extra_packages: ['vim','imagemagick','libmagickwand-dev']
+#
+
+#######################################  Nagios server setup parameters
+nagios_server: false                    # Set to flase if installing only nagios client
+#nagios_password: ernlntlsglnb324
+#nagios_user: joshnagiosadmin
+#nagios_admin_email: lucky.cs02@gmail.com.com
+#nagios_host: 'nagios.josh.com'
+
+
+######################################  Nagios client setup parameters
+#nagios_client: true                    # Set to true if ins talling nagios client
+#nagios_server_ip: "54.85.150.21"       # This is IP is for default nagios server. 
+#nagios_add_node: true                  # Set true if you wants to add node to nagios server
+#nagios_hostgroup: '' # hostgroup name for server
+#nagios_check_http: ''                  #Use the same value from "app_domain_name" variable
+
+######################################  Below are the plugin configuration, To start monitoring services, just enable(set true) & specify the details
+
+######################################  details for redis plugin
+#nagios_redis: true
+redis:
+  host: 'localhost'
+  username: ''         #redis login user
+  password: ''     #redis login password for above user
+
+
+###################################### specify postgres login details for postgres check plugin
+#nagios_postgres: true
+#postgresql:
+#  host: "localhost"
+#  username: 'postgres'
+#  password: 'postgres'
+#  database: "flip_staging"
+
+
+#######################################  Postgresql playbook parameter
+#parameter to setup postgres user password & create new user
+pgsql:
+  secret:
+    postgres_password: 'postgres'        #postgres user password
+    username: 'postgres'                 #Username for new user
+    password: 'postgres'                 #Password for new user
+
+postgres_version: '11'                #specify postgres version
+postgres_allow_conn_from: []           #Server ip's from where app/service will connect using above mention username to postgresql db
+
+
+#######################################  Elastic search parameters
+es_instance_name: "node1"               #Name your elastic search node
+es_data_dirs: "/www/elasticsearch/index"
+es_log_dir: "/www/elasticsearch/logs"
+
+
+

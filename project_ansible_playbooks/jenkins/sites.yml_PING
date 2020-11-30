@@ -1,0 +1,55 @@
+---
+################################################################
+#Do not remove below host block, this is to check python binary#
+################################################################
+###### To Test Connectivity ##
+- hosts: all
+  gather_facts: False
+  tasks:
+   - name: ping server
+     ping:
+       data: crash
+
+
+#- hosts: all
+#  gather_facts: False
+#  tasks:
+#   - name: install python 3 
+#     raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3-minimal)
+
+################################################################
+#Do not remove below host block, this is to gather server facts#
+################################################################
+#- hosts: all
+#  tasks:
+#  - name: Fake task to get facts
+#    service: name={{ item }} state=present
+#    with_items:
+#    - []
+
+# Use below host block & uncomment ansible roles which you wants to run on target host group
+#- name: setup nagios client
+#  hosts: appserver
+#  roles:
+#    - "ansible-ruby"                    # Delete this line if you are not installing ruby using Sourcecode, for variables refer vars.yml
+#    - "ansible-rvm-ruby"                # Delete this line if you are not installing ruby using RVM, for variables refer vars.yml
+#    - "ansible-monit"
+#    - "ansible-nginx-passenger"         # Configure nginx with passenger, for variables refer vars.yml
+#    - "ansible-redis"                   # Configure redis stand alone, for variables refer vars.yml
+#    - "ansible-mongo"                   # Configure mongo standalone, for variables refer vars.yml
+#    - "ansible-postgresql"              # Setup postgres, for variables refer vars.yml
+#    - "ansible-nagios-client"           # Configure nagios client, for variables refer vars.yml
+
+##To add node to Nagios server? just enable beow block as it is but dont forget to add nagios_server,nagios_client in hosts file as mentioned in example file.
+#- name: setup nagios 
+#  hosts: nagios_server,nagios_client
+#  roles:
+#   - ansible-nagios-client
+
+#Note: To setup a component on separate server? create new host block & add role in it like below example
+#Install elasticsearch on single/separate server
+
+#- name: setup elasticsearch server node
+#  hosts: <host-group-name>
+#  roles:
+#    - "ansible-elasticsearch"           # Adding elasticsearch role for standalone standalone, for variables refer vars.yml

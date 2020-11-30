@@ -1,0 +1,10 @@
+[nagios_client:children]                  #If ouy are installling nagios client on the server then this hostgroup is mandatory. Use below hostgroup name as a member
+appserver
+
+[appserver]
+ansible_host=13.126.42.69 
+
+[appserver:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=/home/krish/.ssh/id_rsa
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
