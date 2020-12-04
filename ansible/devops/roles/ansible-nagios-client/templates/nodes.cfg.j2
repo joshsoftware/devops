@@ -50,6 +50,7 @@ define service {
 define service {
         use                             generic-service
         host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
+
         service_description             check zombie procs
         check_command                   check_nrpe!check_zombie_procs
 }
