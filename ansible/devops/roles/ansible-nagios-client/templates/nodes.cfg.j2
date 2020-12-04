@@ -1,6 +1,7 @@
 define host {
         use                             linux-server
         host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
+
         hostgroups                      {{ nagios_hostgroup }}
         alias                           {{ item }} server
         address                         {{ item }}
