@@ -13,69 +13,69 @@ define host {
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             PING
         check_command                   check_ping!100.0,20%!500.0,60%
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             HTTP
         check_command                   check_http!{% if nagios_check_http != ''%}{{ nagios_check_http }}{% else %}{{ item }}{% endif %}
         
         }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }} 
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %} 
         service_description             SSH
         check_command                   check_ssh
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check disk
         check_command                   check_nrpe!check_disk
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check process
         check_command                   check_nrpe!check_total_procs
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check zombie procs
         check_command                   check_nrpe!check_zombie_procs
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check load
         check_command                   check_nrpe!check_load
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }} 
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %} 
         service_description             check users
         check_command                   check_nrpe!check_users
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check memory
         check_command                   check_nrpe!check_mem
 }
 {% if nagios_redis is defined %}
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check redis
         check_command                   check_nrpe!check_redis_ping
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }} 
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %} 
         service_description             check checkredis connections
         check_command                   check_nrpe!check_redis_connections
 }
@@ -85,13 +85,13 @@ define service {
 
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check postgres conn
         check_command                   check_nrpe!check_postgres_conn
 }
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check postgres backends
         check_command                   check_nrpe!check_postgres_clients
 }
@@ -101,28 +101,28 @@ define service {
 
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check mongodb conn
         check_command                   check_nrpe!check_mongo_conn
 }
 
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check mongodb backends
         check_command                   check_nrpe!check_mongo_clients
 }
 
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check mongodb dbsize
         check_command                   check_nrpe!check_mongo_dbsize
 }
 
 define service {
         use                             generic-service
-        host_name                       {{ item }}_{{ nagios_hostgroup }}
+        host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %}
         service_description             check mongodb memory
         check_command                   check_nrpe!check_mongo_mem
 }
