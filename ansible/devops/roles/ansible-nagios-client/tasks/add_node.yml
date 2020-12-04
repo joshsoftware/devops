@@ -21,7 +21,7 @@
 - name: add node to server
   template:
     src: templates/nodes.cfg.j2
-    dest: "/usr/local/nagios/etc/servers/{{ item }}.cfg"
+    dest: "/usr/local/nagios/etc/servers/{{ item }}_{{ nagios_hostgroup }}.cfg"
   tags:
     - add_node
   with_items:
