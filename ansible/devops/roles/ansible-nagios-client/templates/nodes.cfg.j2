@@ -25,7 +25,7 @@ define service {
 	service_description             HTTP
         check_command                   check_http!{% if nagios_check_http != ''%}{{ nagios_check_http }}{% else %}{{ item }}{% endif %}
         
-        }
+}
 define service {
         use                             generic-service
         host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %} 
