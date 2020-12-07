@@ -10,6 +10,7 @@ define host {
         notification_interval           30
         notification_period             24x7
         notification_options            d,r
+	contacts			{{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
