@@ -18,6 +18,7 @@ define service {
 
         service_description             PING
         check_command                   check_ping!100.0,20%!500.0,60%
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
@@ -25,13 +26,15 @@ define service {
       
 	service_description             HTTP
         check_command                   check_http!{% if nagios_check_http != ''%}{{ nagios_check_http }}{% else %}{{ item }}{% endif %}
-        
+        contacts                        {{ nagios_hostgroup }}      
 }
 define service {
         use                             generic-service
         host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %} 
         service_description             SSH
         check_command                   check_ssh
+        contacts                        {{ nagios_hostgroup }}
+
 }
 define service {
         use                             generic-service
@@ -39,6 +42,7 @@ define service {
 
         service_description             check disk
         check_command                   check_nrpe!check_disk
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
@@ -46,6 +50,7 @@ define service {
 
         service_description             check process
         check_command                   check_nrpe!check_total_procs
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
@@ -53,6 +58,7 @@ define service {
 
         service_description             check zombie procs
         check_command                   check_nrpe!check_zombie_procs
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
@@ -60,12 +66,14 @@ define service {
 
         service_description             check load
         check_command                   check_nrpe!check_load
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
         host_name                       {% if host_name != ''%}{{ host_name }}{% else %}{{ item }}_{{ nagios_hostgroup }}{% endif %} 
         service_description             check users
         check_command                   check_nrpe!check_users
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
@@ -73,6 +81,7 @@ define service {
 
         service_description             check memory
         check_command                   check_nrpe!check_mem
+        contacts                        {{ nagios_hostgroup }}
 }
 {% if nagios_redis is defined %}
 define service {
@@ -81,6 +90,7 @@ define service {
 
         service_description             check redis
         check_command                   check_nrpe!check_redis_ping
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
@@ -88,6 +98,7 @@ define service {
 
         service_description             check checkredis connections
         check_command                   check_nrpe!check_redis_connections
+        contacts                        {{ nagios_hostgroup }}
 }
 {% endif %}
 
@@ -99,6 +110,7 @@ define service {
 
         service_description             check postgres conn
         check_command                   check_nrpe!check_postgres_conn
+        contacts                        {{ nagios_hostgroup }}
 }
 define service {
         use                             generic-service
@@ -106,6 +118,7 @@ define service {
 
         service_description             check postgres backends
         check_command                   check_nrpe!check_postgres_clients
+        contacts                        {{ nagios_hostgroup }}
 }
 {% endif %}
 
@@ -117,6 +130,7 @@ define service {
 
         service_description             check mongodb conn
         check_command                   check_nrpe!check_mongo_conn
+        contacts                        {{ nagios_hostgroup }}
 }
 
 define service {
@@ -125,6 +139,7 @@ define service {
 
         service_description             check mongodb backends
         check_command                   check_nrpe!check_mongo_clients
+        contacts                        {{ nagios_hostgroup }}
 }
 
 define service {
@@ -133,6 +148,7 @@ define service {
 
         service_description             check mongodb dbsize
         check_command                   check_nrpe!check_mongo_dbsize
+        contacts                        {{ nagios_hostgroup }}
 }
 
 define service {
@@ -141,5 +157,6 @@ define service {
 
         service_description             check mongodb memory
         check_command                   check_nrpe!check_mongo_mem
+        contacts                        {{ nagios_hostgroup }}
 }
 {% endif %}
